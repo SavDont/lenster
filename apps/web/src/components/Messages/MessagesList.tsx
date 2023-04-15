@@ -56,7 +56,7 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
             'w-full rounded-lg'
           )}
         >
-          {!message.isMoonlight ?
+          {!message.isMoonlight ? (
             <span
               className={clsx(
                 address === message.senderAddress && 'text-white',
@@ -65,15 +65,16 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
             >
               {message.error ? `Error: ${message.error?.message}` : <Markup>{message.content}</Markup> ?? ''}
             </span>
-          :
+          ) : (
             <span className="text-3xl text-white">
               {message.moonlightAmount} {message.moonlightToken} Request
             </span>
-          }
-          {address !== message.senderAddress && message.isMoonlight &&
-            <div className="mt-4"><Button variant="secondary">Accept</Button></div>
-          }
-
+          )}
+          {address !== message.senderAddress && message.isMoonlight && (
+            <div className="mt-4">
+              <Button variant="secondary">Accept</Button>
+            </div>
+          )}
         </div>
       </div>
       <div className={clsx(address !== message.senderAddress ? 'ml-12' : '')}>

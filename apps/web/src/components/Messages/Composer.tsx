@@ -23,7 +23,6 @@ const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversa
   const [paymentAmount, setPaymentAmount] = useState<string>('');
   const [paymentRequesting, setPaymentRequesting] = useState<boolean>(false);
 
-
   const [message, setMessage] = useState<string>('');
   const [sending, setSending] = useState<boolean>(false);
   const { width } = useWindowSize();
@@ -74,6 +73,8 @@ const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversa
     sendPaymentRequest(paymentAmount, paymentToken);
     setPaymentRequesting(false);
     setShowPaymentModal(false);
+    setPaymentToken('');
+    setPaymentAmount('');
   };
 
   const onPaymentTokenChange = (value: string) => {
