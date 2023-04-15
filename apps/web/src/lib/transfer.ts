@@ -1,8 +1,7 @@
 import type { Signer } from 'ethers';
-import { ethers, providers } from 'ethers';
+import { ethers } from 'ethers';
 
 import ABI from './abi.json';
-import { useSigner } from 'wagmi';
 
 async function transfer(
   tokenAddress: string,
