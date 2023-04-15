@@ -1,6 +1,6 @@
 import Markup from '@components/Shared/Markup';
 import type { DecodedMessageWithMoonlight } from '@components/utils/hooks/useGetMessages';
-import { EmojiSadIcon, CheckCircleIcon } from '@heroicons/react/outline';
+import { CheckCircleIcon, EmojiSadIcon } from '@heroicons/react/outline';
 import { formatTime } from '@lib/formatTime';
 import transfer from '@lib/transfer';
 import { Trans } from '@lingui/macro';
