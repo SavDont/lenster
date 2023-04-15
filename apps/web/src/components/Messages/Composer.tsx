@@ -13,6 +13,7 @@ import { Button, Input, Modal, Select, Spinner } from 'ui';
 interface ComposerProps {
   sendMessage: (message: string) => Promise<boolean>;
   sendPaymentRequest: (amount: string, token: string, to?: string) => Promise<boolean>;
+  sendPaymentReceipt: (amount: string, token: string, txHash: string, to?: string) => Promise<boolean>;
   conversationKey: string;
   disabledInput: boolean;
 }
@@ -20,7 +21,13 @@ interface ComposerProps {
 const initialPaymentToken = 'ETH';
 const initialPaymentAmount = '0.01';
 
-const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversationKey, disabledInput }) => {
+const Composer: FC<ComposerProps> = ({
+  sendMessage,
+  sendPaymentRequest,
+  sendPaymentReceipt,
+  conversationKey,
+  disabledInput
+}) => {
   const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
   const [paymentToken, setPaymentToken] = useState<string>(initialPaymentToken);
   const [paymentAmount, setPaymentAmount] = useState<string>(initialPaymentAmount);
@@ -39,6 +46,12 @@ const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversa
       return;
     }
     setSending(true);
+    // TODO
+    sendPaymentReceipt(
+      paymentAmount,
+      paymentToken,
+      '0x6f19f28e14f30b3da71a6b185b9cf5e241811ac6742e036c047a89c0e1de8fcf'
+    );
     const sent = await sendMessage(message);
     if (sent) {
       setMessage('');

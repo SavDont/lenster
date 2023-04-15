@@ -48,7 +48,7 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
         )}
         <div
           className={clsx(
-            message.isMoonlight && message.moonlightType == 'request'
+            message.isMoonlight
               ? 'bg-black p-8'
               : address === message.senderAddress
               ? 'bg-brand-500 px-4 py-2'
@@ -67,12 +67,23 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
             </span>
           ) : (
             <span className="text-3xl text-white">
-              {message.moonlightAmount} {message.moonlightToken} Request
+              {message.moonlightAmount} {message.moonlightToken}
+              {message.moonlightType == 'request' && ' Request'}
             </span>
           )}
-          {address !== message.senderAddress && message.isMoonlight && (
+          {address !== message.senderAddress && message.isMoonlight && message.moonlightType == 'request' && (
             <div className="mt-4">
               <Button variant="secondary">Accept</Button>
+            </div>
+          )}
+          {message.isMoonlight && message.moonlightType == 'receipt' && (
+            <div className="mt-4">
+              <Button
+                variant="secondary"
+                onClick={() => window.open(`https://polygonscan.com/tx/${message.moonlightTxHash}`)}
+              >
+                View in Block Explorer
+              </Button>
             </div>
           )}
         </div>
