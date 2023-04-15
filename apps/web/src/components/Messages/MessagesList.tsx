@@ -1,6 +1,6 @@
 import Markup from '@components/Shared/Markup';
 import type { DecodedMessageWithMoonlight } from '@components/utils/hooks/useGetMessages';
-import { CheckCircleIcon, EmojiSadIcon } from '@heroicons/react/outline';
+import { CheckCircleIcon, ClockIcon, EmojiSadIcon } from '@heroicons/react/outline';
 import { formatTime } from '@lib/formatTime';
 import transfer from '@lib/transfer';
 import { Trans } from '@lingui/macro';
@@ -102,7 +102,17 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile, s
                     <CheckCircleIcon className="h-4 w-4" />
                   </div>
                 )}
+                {message.moonlightType == 'request' && !message.moonlightTxHash && (
+                  <div className="text-orange-500">
+                    <ClockIcon className="h-4 w-4" />
+                  </div>
+                )}
                 {message.moonlightType == 'receipt' && <div>Paid</div>}
+                {message.moonlightType == 'receipt' && (
+                  <div className="text-green-500">
+                    <CheckCircleIcon className="h-4 w-4" />
+                  </div>
+                )}
               </div>
 
               <span className="text-3xl text-white">
