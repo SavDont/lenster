@@ -1,8 +1,8 @@
 import Markup from '@components/Shared/Markup';
+import type { DecodedMessageWithMoonlight } from '@components/utils/hooks/useGetMessages';
 import { EmojiSadIcon } from '@heroicons/react/outline';
 import { formatTime } from '@lib/formatTime';
 import { Trans } from '@lingui/macro';
-import type { DecodedMessage } from '@xmtp/xmtp-js';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import type { Profile } from 'lens';
@@ -20,7 +20,7 @@ const isOnSameDay = (d1?: Date, d2?: Date): boolean => {
 const formatDate = (d?: Date) => dayjs(d).format('MMMM D, YYYY');
 
 interface MessageTileProps {
-  message: DecodedMessage;
+  message: DecodedMessageWithMoonlight;
   profile?: Profile;
   currentProfile?: Profile | null;
 }
@@ -49,6 +49,7 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
         <div
           className={clsx(
             address === message.senderAddress ? 'bg-brand-500' : 'bg-gray-100 dark:bg-gray-700',
+            message.isMoonlight && message.moonlightType == 'request' ? 'bg-black' : '',
             'w-full rounded-lg px-4 py-2'
           )}
         >
@@ -120,7 +121,7 @@ const LoadingMore: FC = () => (
 );
 
 interface MessageListProps {
-  messages: DecodedMessage[];
+  messages: DecodedMessageWithMoonlight[];
   fetchNextMessages: () => void;
   profile?: Profile;
   currentProfile?: Profile | null;
@@ -153,7 +154,7 @@ const MessagesList: FC<MessageListProps> = ({
         <div className="flex h-full w-full flex-col-reverse overflow-y-auto">
           {missingXmtpAuth && <MissingXmtpAuth />}
           <span className="flex flex-col-reverse overflow-y-auto overflow-x-hidden">
-            {messages?.map((msg: DecodedMessage, index) => {
+            {messages?.map((msg: DecodedMessageWithMoonlight, index) => {
               const dateHasChanged = lastMessageDate ? !isOnSameDay(lastMessageDate, msg.sent) : false;
               const messageDiv = (
                 <div key={`${msg.id}_${index}`} ref={index === messages.length - 1 ? observe : null}>
