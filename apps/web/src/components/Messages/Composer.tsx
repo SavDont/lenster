@@ -4,12 +4,15 @@ import { Mixpanel } from '@lib/mixpanel';
 import { t, Trans } from '@lingui/macro';
 import clsx from 'clsx';
 import { MIN_WIDTH_DESKTOP } from 'data/constants';
+import { ethers } from 'ethers';
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useMessagePersistStore } from 'src/store/message';
+import { useAppStore } from 'src/store/app';
+import { useMessagePersistStore, useMessageStore } from 'src/store/message';
 import { MESSAGES } from 'src/tracking';
 import { Button, Input, Modal, Select, Spinner } from 'ui';
+import { useSigner } from 'wagmi';
 interface ComposerProps {
   sendMessage: (message: string) => Promise<boolean>;
   sendPaymentRequest: (amount: string, token: string, to?: string) => Promise<boolean>;
@@ -17,7 +20,7 @@ interface ComposerProps {
   disabledInput: boolean;
 }
 
-const initialPaymentToken = 'ETH';
+const initialPaymentToken = 'MATIC';
 const initialPaymentAmount = '0.01';
 
 const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversationKey, disabledInput }) => {
@@ -33,6 +36,7 @@ const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversa
   const setUnsentMessage = useMessagePersistStore((state) => state.setUnsentMessage);
 
   const canSendMessage = !disabledInput && !sending && message.length > 0;
+  const signer = useSigner();
 
   const handleSend = async () => {
     if (!canSendMessage) {
@@ -78,6 +82,14 @@ const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversa
     setShowPaymentModal(false);
     setPaymentToken(initialPaymentToken);
     setPaymentAmount(initialPaymentAmount);
+  };
+
+  const fromAddress = useAppStore((state) => state.currentProfile)?.ownedBy;
+  const toAddress = useMessageStore((state) => state.messageProfiles.get(conversationKey))?.ownedBy;
+
+  const handlePaymentSending = async () => {
+    const tokenAddress = paymentToken == 'MATIC' ? '' : '0xE097d6B3100777DC31B34dC2c58fB524C2e76921';
+    const qty = ethers.utils.parseUnits(paymentAmount, paymentToken == 'MATIC' ? 18 : 6);
   };
 
   const onPaymentTokenChange = (value: string) => {
@@ -129,7 +141,7 @@ const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversa
           <Trans>Token</Trans>
           <div className="flex justify-center space-x-4 py-4">
             <Select
-              options={['ETH', 'USDC', 'DAI']}
+              options={['MATIC', 'USDC']}
               value={paymentToken}
               onChange={(value: string) => onPaymentTokenChange(value)}
             />
@@ -150,7 +162,7 @@ const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversa
                 'text-brand m-2 ml-4 flex flex-1 cursor-pointer items-center justify-center rounded p-2 font-bold'
               )}
             >
-              <Button>Send</Button>
+              <Button onClick={handlePaymentSending}>Send</Button>
             </div>
             <div
               className={clsx(
