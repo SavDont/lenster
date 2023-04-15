@@ -88,6 +88,7 @@ const Message: FC<MessageProps> = ({ conversationKey }) => {
                 messages={messages ?? []}
                 hasMore={hasMore}
                 missingXmtpAuth={missingXmtpAuth ?? false}
+                sendPaymentReceipt={sendPaymentReceipt}
               />
               <Composer
                 sendMessage={sendMessage}

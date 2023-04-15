@@ -11,9 +11,9 @@ import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
 import getAvatar from 'lib/getAvatar';
 import type { FC, ReactNode } from 'react';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useInView } from 'react-cool-inview';
-import { Button, Card, Image } from 'ui';
+import { Button, Card, Image, Spinner } from 'ui';
 import { useSigner } from 'wagmi';
 
 const isOnSameDay = (d1?: Date, d2?: Date): boolean => {
@@ -26,14 +26,17 @@ interface MessageTileProps {
   message: DecodedMessageWithMoonlight;
   profile?: Profile;
   currentProfile?: Profile | null;
+  sendPaymentReceipt: (amount: string, token: string, txHash: string, to?: string) => Promise<boolean>;
 }
 
-const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile }) => {
+const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile, sendPaymentReceipt }) => {
   const address = currentProfile?.ownedBy;
 
   const { data: signer } = useSigner();
+  const [paymentSending, setPaymentSending] = useState<boolean>(false);
 
   const handlePaymentSending = async () => {
+    setPaymentSending(true);
     const token = message.moonlightToken!;
     const fromAddress = currentProfile?.ownedBy;
     const toAddress = profile?.ownedBy;
@@ -41,7 +44,10 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
     const tokenAddress = token == 'MATIC' ? '' : '0xE097d6B3100777DC31B34dC2c58fB524C2e76921';
     const qty = ethers.utils.parseUnits(message.moonlightAmount!, token == 'MATIC' ? 18 : 6);
 
-    transfer(tokenAddress, toAddress, fromAddress, qty, signer!);
+    const txHash = await transfer(tokenAddress, toAddress, fromAddress, qty, signer!);
+
+    sendPaymentReceipt(message.moonlightAmount!, token, txHash);
+    setPaymentSending(false);
   };
 
   return (
@@ -90,7 +96,10 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
           {address !== message.senderAddress && message.isMoonlight && message.moonlightType == 'request' && (
             <div className="mt-4">
               <Button variant="secondary" onClick={handlePaymentSending}>
-                Accept
+                <div>
+                  {!paymentSending && <p>Accept</p>}
+                  {paymentSending && <Spinner size="sm" className="h-5 w-5" />}
+                </div>
               </Button>
             </div>
           )}
@@ -170,6 +179,7 @@ interface MessageListProps {
   currentProfile?: Profile | null;
   hasMore: boolean;
   missingXmtpAuth: boolean;
+  sendPaymentReceipt: (amount: string, token: string, txHash: string, to?: string) => Promise<boolean>;
 }
 
 const MessagesList: FC<MessageListProps> = ({
@@ -178,7 +188,8 @@ const MessagesList: FC<MessageListProps> = ({
   profile,
   currentProfile,
   hasMore,
-  missingXmtpAuth
+  missingXmtpAuth,
+  sendPaymentReceipt
 }) => {
   let lastMessageDate: Date | undefined;
   const { observe } = useInView({
@@ -201,7 +212,12 @@ const MessagesList: FC<MessageListProps> = ({
               const dateHasChanged = lastMessageDate ? !isOnSameDay(lastMessageDate, msg.sent) : false;
               const messageDiv = (
                 <div key={`${msg.id}_${index}`} ref={index === messages.length - 1 ? observe : null}>
-                  <MessageTile currentProfile={currentProfile} profile={profile} message={msg} />
+                  <MessageTile
+                    currentProfile={currentProfile}
+                    profile={profile}
+                    message={msg}
+                    sendPaymentReceipt={sendPaymentReceipt}
+                  />
                   {dateHasChanged ? <DateDivider date={lastMessageDate} /> : null}
                 </div>
               );
