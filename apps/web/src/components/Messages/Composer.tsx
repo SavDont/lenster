@@ -17,10 +17,13 @@ interface ComposerProps {
   disabledInput: boolean;
 }
 
+const initialPaymentToken = 'ETH';
+const initialPaymentAmount = '0.01';
+
 const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversationKey, disabledInput }) => {
   const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
-  const [paymentToken, setPaymentToken] = useState<string>('ETH');
-  const [paymentAmount, setPaymentAmount] = useState<string>('0.01');
+  const [paymentToken, setPaymentToken] = useState<string>(initialPaymentToken);
+  const [paymentAmount, setPaymentAmount] = useState<string>(initialPaymentAmount);
   const [paymentRequesting, setPaymentRequesting] = useState<boolean>(false);
 
   const [message, setMessage] = useState<string>('');
@@ -73,8 +76,8 @@ const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversa
     sendPaymentRequest(paymentAmount, paymentToken);
     setPaymentRequesting(false);
     setShowPaymentModal(false);
-    setPaymentToken('');
-    setPaymentAmount('');
+    setPaymentToken(initialPaymentToken);
+    setPaymentAmount(initialPaymentAmount);
   };
 
   const onPaymentTokenChange = (value: string) => {
