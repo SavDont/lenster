@@ -19,7 +19,7 @@ const detectMoonlightMessage = (message: DecodedMessage) => {
     /#Moonlight - .+ sent you a payment request:\nAmount: (?<amount>[\d.]*)\nToken: (?<token>\w*)\nAddress: (?<to>\w*)/;
   const paymentReceiptE =
     /#Moonlight - .+ paid you:\nAmount: (?<amount>[\d.]*)\nToken: (?<token>\w*)\nAddress: (?<to>\w*)\nTxHash: (?<txHash>\w*)/;
-  if (message.content.startsWith('#Moonlight')) {
+  if (message.content && message.content.startsWith('#Moonlight')) {
     let m = paymentRequestE.exec(message.content);
     if (m) {
       console.log('Detected moonlight message', message.content);

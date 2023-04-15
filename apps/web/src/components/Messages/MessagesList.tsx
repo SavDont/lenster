@@ -35,8 +35,8 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
 
   const handlePaymentSending = async () => {
     const token = message.moonlightToken!;
-    const fromAddress = message.moonlightFrom!;
-    const toAddress = message.moonlightTo!;
+    const fromAddress = currentProfile?.ownedBy;
+    const toAddress = profile?.ownedBy;
 
     const tokenAddress = token == 'MATIC' ? '' : '0xE097d6B3100777DC31B34dC2c58fB524C2e76921';
     const qty = ethers.utils.parseUnits(message.moonlightAmount!, token == 'MATIC' ? 18 : 6);
