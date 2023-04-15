@@ -48,8 +48,11 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
         )}
         <div
           className={clsx(
-            address === message.senderAddress ? 'bg-brand-500' : 'bg-gray-100 dark:bg-gray-700',
-            message.isMoonlight && message.moonlightType == 'request' ? 'bg-black p-8' : 'px-4 py-2',
+            message.isMoonlight && message.moonlightType == 'request'
+              ? 'bg-black p-8'
+              : address === message.senderAddress
+              ? 'bg-brand-500 px-4 py-2'
+              : 'bg-gray-100 px-4 py-2 dark:bg-gray-700',
             'w-full rounded-lg'
           )}
         >
@@ -67,7 +70,7 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
               {message.moonlightAmount} {message.moonlightToken} Request
             </span>
           }
-          {message.isMoonlight &&
+          {address !== message.senderAddress && message.isMoonlight &&
             <div className="mt-4"><Button variant="secondary">Accept</Button></div>
           }
 
