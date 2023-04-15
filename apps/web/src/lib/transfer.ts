@@ -1,34 +1,33 @@
-import type { Wallet } from 'ethers';
+import type { Signer } from 'ethers';
 import { ethers, providers } from 'ethers';
 
 import ABI from './abi.json';
+import { useSigner } from 'wagmi';
 
 async function transfer(
   tokenAddress: string,
   toAddress: string,
   fromAddress: string,
   amount: ethers.BigNumber,
-  signer: Wallet
-): Promise<void> {
-  const rpcUrl = 'https://rpc-mumbai.maticvigil.com';
-  const provider = new providers.JsonRpcProvider(rpcUrl);
+  signer: Signer
+): Promise<string> {
   if (!tokenAddress) {
     // transfer MATIC
-    const transaction = [
-      {
-        from: fromAddress,
-        to: toAddress,
-        value: amount.toHexString()
-      }
-    ];
+    const transaction = {
+      from: fromAddress,
+      to: toAddress,
+      value: amount.toHexString()
+    };
 
-    const tx = await provider.send('eth_sendTransaction', transaction);
+    const tx = await signer.sendTransaction(transaction);
     console.log('transactionHash is ', tx);
+    return tx.hash;
   } else {
     const contract = new ethers.Contract(tokenAddress, ABI, signer);
     console.log('contract is ', contract);
     const tx = contract.transfer(toAddress, amount);
     console.log('transactionHash is ', tx);
+    return tx;
   }
 }
 

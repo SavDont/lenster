@@ -2,9 +2,11 @@ import Markup from '@components/Shared/Markup';
 import type { DecodedMessageWithMoonlight } from '@components/utils/hooks/useGetMessages';
 import { EmojiSadIcon } from '@heroicons/react/outline';
 import { formatTime } from '@lib/formatTime';
+import transfer from '@lib/transfer';
 import { Trans } from '@lingui/macro';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
+import { ethers } from 'ethers';
 import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
 import getAvatar from 'lib/getAvatar';
@@ -12,6 +14,7 @@ import type { FC, ReactNode } from 'react';
 import { memo } from 'react';
 import { useInView } from 'react-cool-inview';
 import { Button, Card, Image } from 'ui';
+import { useSigner } from 'wagmi';
 
 const isOnSameDay = (d1?: Date, d2?: Date): boolean => {
   return dayjs(d1).format('YYYYMMDD') === dayjs(d2).format('YYYYMMDD');
@@ -27,6 +30,19 @@ interface MessageTileProps {
 
 const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile }) => {
   const address = currentProfile?.ownedBy;
+
+  const { data: signer } = useSigner();
+
+  const handlePaymentSending = async () => {
+    const token = message.moonlightToken!;
+    const fromAddress = message.moonlightFrom!;
+    const toAddress = message.moonlightTo!;
+
+    const tokenAddress = token == 'MATIC' ? '' : '0xE097d6B3100777DC31B34dC2c58fB524C2e76921';
+    const qty = ethers.utils.parseUnits(message.moonlightAmount!, token == 'MATIC' ? 18 : 6);
+
+    transfer(tokenAddress, toAddress, fromAddress, qty, signer!);
+  };
 
   return (
     <div
@@ -73,14 +89,16 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
           )}
           {address !== message.senderAddress && message.isMoonlight && message.moonlightType == 'request' && (
             <div className="mt-4">
-              <Button variant="secondary">Accept</Button>
+              <Button variant="secondary" onClick={handlePaymentSending}>
+                Accept
+              </Button>
             </div>
           )}
           {message.isMoonlight && message.moonlightType == 'receipt' && (
             <div className="mt-4">
               <Button
                 variant="secondary"
-                onClick={() => window.open(`https://polygonscan.com/tx/${message.moonlightTxHash}`)}
+                onClick={() => window.open(`https://mumbai.polygonscan.com/tx/${message.moonlightTxHash}`)}
               >
                 View in Block Explorer
               </Button>

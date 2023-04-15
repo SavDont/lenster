@@ -1,6 +1,7 @@
 import useWindowSize from '@components/utils/hooks/useWindowSize';
 import { ArrowRightIcon } from '@heroicons/react/outline';
 import { Mixpanel } from '@lib/mixpanel';
+import transfer from '@lib/transfer';
 import { t, Trans } from '@lingui/macro';
 import clsx from 'clsx';
 import { MIN_WIDTH_DESKTOP } from 'data/constants';
@@ -35,6 +36,7 @@ const Composer: FC<ComposerProps> = ({
   const [paymentToken, setPaymentToken] = useState<string>(initialPaymentToken);
   const [paymentAmount, setPaymentAmount] = useState<string>(initialPaymentAmount);
   const [paymentRequesting, setPaymentRequesting] = useState<boolean>(false);
+  const [paymentSending, setPaymentSending] = useState<boolean>(false);
 
   const [message, setMessage] = useState<string>('');
   const [sending, setSending] = useState<boolean>(false);
@@ -43,19 +45,13 @@ const Composer: FC<ComposerProps> = ({
   const setUnsentMessage = useMessagePersistStore((state) => state.setUnsentMessage);
 
   const canSendMessage = !disabledInput && !sending && message.length > 0;
-  const signer = useSigner();
+  const { data: signer } = useSigner();
 
   const handleSend = async () => {
     if (!canSendMessage) {
       return;
     }
     setSending(true);
-    // TODO
-    sendPaymentReceipt(
-      paymentAmount,
-      paymentToken,
-      '0x6f19f28e14f30b3da71a6b185b9cf5e241811ac6742e036c047a89c0e1de8fcf'
-    );
     const sent = await sendMessage(message);
     if (sent) {
       setMessage('');
@@ -101,8 +97,17 @@ const Composer: FC<ComposerProps> = ({
   const toAddress = useMessageStore((state) => state.messageProfiles.get(conversationKey))?.ownedBy;
 
   const handlePaymentSending = async () => {
+    setPaymentSending(true);
+
     const tokenAddress = paymentToken == 'MATIC' ? '' : '0xE097d6B3100777DC31B34dC2c58fB524C2e76921';
     const qty = ethers.utils.parseUnits(paymentAmount, paymentToken == 'MATIC' ? 18 : 6);
+    const txHash = await transfer(tokenAddress, toAddress, fromAddress, qty, signer!);
+
+    sendPaymentReceipt(paymentAmount, paymentToken, txHash);
+    setPaymentSending(false);
+    setShowPaymentModal(false);
+    setPaymentToken(initialPaymentToken);
+    setPaymentAmount(initialPaymentAmount);
   };
 
   const onPaymentTokenChange = (value: string) => {
@@ -175,7 +180,12 @@ const Composer: FC<ComposerProps> = ({
                 'text-brand m-2 ml-4 flex flex-1 cursor-pointer items-center justify-center rounded p-2 font-bold'
               )}
             >
-              <Button onClick={handlePaymentSending}>Send</Button>
+              <Button onClick={handlePaymentSending}>
+                <div>
+                  {!paymentSending && <p>Send</p>}
+                  {paymentSending && <Spinner size="sm" className="h-5 w-5" />}
+                </div>
+              </Button>
             </div>
             <div
               className={clsx(
