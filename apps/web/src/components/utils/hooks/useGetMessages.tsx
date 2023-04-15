@@ -17,13 +17,29 @@ export class DecodedMessageWithMoonlight extends DecodedMessage {
 const detectMoonlightMessage = (message: DecodedMessage) => {
   const paymentRequestE =
     /#Moonlight - .+ sent you a payment request:\nAmount: (?<amount>[\d.]*)\nToken: (?<token>\w*)\nAddress: (?<to>\w*)/;
+  const paymentReceiptE =
+    /#Moonlight - .+ paid you:\nAmount: (?<amount>[\d.]*)\nToken: (?<token>\w*)\nAddress: (?<to>\w*)\nTxHash: (?<txHash>\w*)/;
   if (message.content.startsWith('#Moonlight')) {
-    const m = paymentRequestE.exec(message.content);
+    let m = paymentRequestE.exec(message.content);
     if (m) {
       console.log('Detected moonlight message', message.content);
       return {
         isMoonlight: true,
         moonlightType: 'request',
+        moonlightAmount: m.groups?.amount,
+        moonlightToken: m.groups?.token,
+        moonlightTo: m.groups?.to,
+        moonlightFrom: m.groups?.from,
+        moonlightTxHash: m.groups?.txHash,
+        ...message
+      } as DecodedMessageWithMoonlight;
+    }
+    m = paymentReceiptE.exec(message.content);
+    if (m) {
+      console.log('Detected moonlight receipt', message.content);
+      return {
+        isMoonlight: true,
+        moonlightType: 'receipt',
         moonlightAmount: m.groups?.amount,
         moonlightToken: m.groups?.token,
         moonlightTo: m.groups?.to,

@@ -48,7 +48,7 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
         )}
         <div
           className={clsx(
-            message.isMoonlight && message.moonlightType == 'request'
+            message.isMoonlight
               ? 'bg-black p-8'
               : address === message.senderAddress
               ? 'bg-brand-500 px-4 py-2'
@@ -56,7 +56,7 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
             'w-full rounded-lg'
           )}
         >
-          {!message.isMoonlight ?
+          {!message.isMoonlight ? (
             <span
               className={clsx(
                 address === message.senderAddress && 'text-white',
@@ -65,15 +65,27 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
             >
               {message.error ? `Error: ${message.error?.message}` : <Markup>{message.content}</Markup> ?? ''}
             </span>
-          :
+          ) : (
             <span className="text-3xl text-white">
-              {message.moonlightAmount} {message.moonlightToken} Request
+              {message.moonlightAmount} {message.moonlightToken}
+              {message.moonlightType == 'request' && ' Request'}
             </span>
-          }
-          {address !== message.senderAddress && message.isMoonlight &&
-            <div className="mt-4"><Button variant="secondary">Accept</Button></div>
-          }
-
+          )}
+          {address !== message.senderAddress && message.isMoonlight && message.moonlightType == 'request' && (
+            <div className="mt-4">
+              <Button variant="secondary">Accept</Button>
+            </div>
+          )}
+          {message.isMoonlight && message.moonlightType == 'receipt' && (
+            <div className="mt-4">
+              <Button
+                variant="secondary"
+                onClick={() => window.open(`https://polygonscan.com/tx/${message.moonlightTxHash}`)}
+              >
+                View in Block Explorer
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       <div className={clsx(address !== message.senderAddress ? 'ml-12' : '')}>

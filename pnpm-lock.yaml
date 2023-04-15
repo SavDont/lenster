@@ -622,7 +622,7 @@ importers:
         specifier: ^1.7.14
         version: 1.7.14(react-dom@18.2.0)(react@18.2.0)
       '@heroicons/react':
-        specifier: v1
+        specifier: ^1.0.6
         version: 1.0.6(react@18.2.0)
       '@hookform/resolvers':
         specifier: ^3.0.1

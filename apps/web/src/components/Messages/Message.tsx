@@ -4,6 +4,7 @@ import Loader from '@components/Shared/Loader';
 import useGetConversation from '@components/utils/hooks/useGetConversation';
 import useGetMessages from '@components/utils/hooks/useGetMessages';
 import useSendMessage from '@components/utils/hooks/useSendMessage';
+import useSendPaymentReceipt from '@components/utils/hooks/useSendPaymentReceipt';
 import useSendPaymentRequest from '@components/utils/hooks/useSendPaymentRequest';
 import useStreamMessages from '@components/utils/hooks/useStreamMessages';
 import { parseConversationKey } from '@lib/conversationKey';
@@ -42,6 +43,7 @@ const Message: FC<MessageProps> = ({ conversationKey }) => {
   useStreamMessages(conversationKey, selectedConversation);
   const { sendMessage } = useSendMessage(selectedConversation);
   const { sendPaymentRequest } = useSendPaymentRequest(selectedConversation);
+  const { sendPaymentReceipt } = useSendPaymentReceipt(selectedConversation);
 
   const fetchNextMessages = useCallback(() => {
     if (hasMore && Array.isArray(messages) && messages.length > 0) {
@@ -88,7 +90,9 @@ const Message: FC<MessageProps> = ({ conversationKey }) => {
                 missingXmtpAuth={missingXmtpAuth ?? false}
               />
               <Composer
-                sendMessage={() => sendPaymentRequest('1.00', 'ETH')}
+                sendMessage={sendMessage}
+                sendPaymentRequest={sendPaymentRequest}
+                sendPaymentReceipt={sendPaymentReceipt}
                 conversationKey={conversationKey}
                 disabledInput={missingXmtpAuth ?? false}
               />

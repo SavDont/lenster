@@ -9,17 +9,29 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useMessagePersistStore } from 'src/store/message';
 import { MESSAGES } from 'src/tracking';
-import { Button, Input, Modal, Spinner } from 'ui';
+import { Button, Input, Modal, Select, Spinner } from 'ui';
 interface ComposerProps {
   sendMessage: (message: string) => Promise<boolean>;
+  sendPaymentRequest: (amount: string, token: string, to?: string) => Promise<boolean>;
+  sendPaymentReceipt: (amount: string, token: string, txHash: string, to?: string) => Promise<boolean>;
   conversationKey: string;
   disabledInput: boolean;
 }
 
-const Composer: FC<ComposerProps> = ({ sendMessage, conversationKey, disabledInput }) => {
+const initialPaymentToken = 'ETH';
+const initialPaymentAmount = '0.01';
+
+const Composer: FC<ComposerProps> = ({
+  sendMessage,
+  sendPaymentRequest,
+  sendPaymentReceipt,
+  conversationKey,
+  disabledInput
+}) => {
   const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
-  const [paymentToken, setPaymentToken] = useState<string>('');
-  const [paymentAmount, setPaymentAmount] = useState<string>('');
+  const [paymentToken, setPaymentToken] = useState<string>(initialPaymentToken);
+  const [paymentAmount, setPaymentAmount] = useState<string>(initialPaymentAmount);
+  const [paymentRequesting, setPaymentRequesting] = useState<boolean>(false);
 
   const [message, setMessage] = useState<string>('');
   const [sending, setSending] = useState<boolean>(false);
@@ -34,6 +46,12 @@ const Composer: FC<ComposerProps> = ({ sendMessage, conversationKey, disabledInp
       return;
     }
     setSending(true);
+    // TODO
+    sendPaymentReceipt(
+      paymentAmount,
+      paymentToken,
+      '0x6f19f28e14f30b3da71a6b185b9cf5e241811ac6742e036c047a89c0e1de8fcf'
+    );
     const sent = await sendMessage(message);
     if (sent) {
       setMessage('');
@@ -62,6 +80,25 @@ const Composer: FC<ComposerProps> = ({ sendMessage, conversationKey, disabledInp
     if (event.key === 'Enter') {
       handleSend();
     }
+  };
+
+  const handlePaymentRequest = async () => {
+    setPaymentRequesting(true);
+
+    // TODO: validation logic here
+    sendPaymentRequest(paymentAmount, paymentToken);
+    setPaymentRequesting(false);
+    setShowPaymentModal(false);
+    setPaymentToken(initialPaymentToken);
+    setPaymentAmount(initialPaymentAmount);
+  };
+
+  const onPaymentTokenChange = (value: string) => {
+    setPaymentToken(value);
+  };
+
+  const onPaymentAmountChange = (value: string) => {
+    setPaymentAmount(value);
   };
 
   return (
@@ -103,12 +140,21 @@ const Composer: FC<ComposerProps> = ({ sendMessage, conversationKey, disabledInp
       >
         <div className="w-full px-4 pt-4">
           <Trans>Token</Trans>
-          <div className="flex justify-center space-x-4 p-4">
-            <Input type="text" placeholder={t`Type a token address`} value={paymentToken} />
+          <div className="flex justify-center space-x-4 py-4">
+            <Select
+              options={['ETH', 'USDC', 'DAI']}
+              value={paymentToken}
+              onChange={(value: string) => onPaymentTokenChange(value)}
+            />
           </div>
           <Trans>Amount</Trans>
-          <div className="flex justify-center space-x-4 p-4">
-            <Input type="text" placeholder={t`Type amount of token`} value={paymentAmount} />
+          <div className="flex justify-center space-x-4 py-4">
+            <Input
+              type="text"
+              placeholder={t`0.01`}
+              value={paymentAmount}
+              onChange={(event) => onPaymentAmountChange(event.target.value)}
+            />
           </div>
 
           <div className="flex">
@@ -124,7 +170,12 @@ const Composer: FC<ComposerProps> = ({ sendMessage, conversationKey, disabledInp
                 'text-brand m-2 ml-4 flex flex-1 cursor-pointer items-center justify-center rounded p-2 font-bold'
               )}
             >
-              <Button>Request</Button>
+              <Button onClick={handlePaymentRequest}>
+                <div>
+                  {!paymentRequesting && <p>Request</p>}
+                  {paymentRequesting && <Spinner size="sm" className="h-5 w-5" />}
+                </div>
+              </Button>
             </div>
           </div>
         </div>
