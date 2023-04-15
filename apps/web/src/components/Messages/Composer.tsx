@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useMessagePersistStore } from 'src/store/message';
 import { MESSAGES } from 'src/tracking';
-import { Button, Input, Modal, Spinner } from 'ui';
+import { Button, Input, Modal, Select, Spinner } from 'ui';
 interface ComposerProps {
   sendMessage: (message: string) => Promise<boolean>;
   sendPaymentRequest: (amount: string, token: string, to?: string) => Promise<boolean>;
@@ -19,8 +19,8 @@ interface ComposerProps {
 
 const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversationKey, disabledInput }) => {
   const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
-  const [paymentToken, setPaymentToken] = useState<string>('');
-  const [paymentAmount, setPaymentAmount] = useState<string>('');
+  const [paymentToken, setPaymentToken] = useState<string>('ETH');
+  const [paymentAmount, setPaymentAmount] = useState<string>('0.01');
   const [paymentRequesting, setPaymentRequesting] = useState<boolean>(false);
 
   const [message, setMessage] = useState<string>('');
@@ -124,19 +124,18 @@ const Composer: FC<ComposerProps> = ({ sendMessage, sendPaymentRequest, conversa
       >
         <div className="w-full px-4 pt-4">
           <Trans>Token</Trans>
-          <div className="flex justify-center space-x-4 p-4">
-            <Input
-              type="text"
-              placeholder={t`Type a token address`}
+          <div className="flex justify-center space-x-4 py-4">
+            <Select
+              options={['ETH', 'USDC', 'DAI']}
               value={paymentToken}
-              onChange={(event) => onPaymentTokenChange(event.target.value)}
+              onChange={(value: string) => onPaymentTokenChange(value)}
             />
           </div>
           <Trans>Amount</Trans>
-          <div className="flex justify-center space-x-4 p-4">
+          <div className="flex justify-center space-x-4 py-4">
             <Input
               type="text"
-              placeholder={t`Type amount of token`}
+              placeholder={t`0.01`}
               value={paymentAmount}
               onChange={(event) => onPaymentAmountChange(event.target.value)}
             />
