@@ -88,7 +88,8 @@ const Message: FC<MessageProps> = ({ conversationKey }) => {
                 missingXmtpAuth={missingXmtpAuth ?? false}
               />
               <Composer
-                sendMessage={() => sendPaymentRequest('1.00', 'ETH')}
+                sendMessage={sendMessage}
+                sendPaymentRequest={sendPaymentRequest}
                 conversationKey={conversationKey}
                 disabledInput={missingXmtpAuth ?? false}
               />
