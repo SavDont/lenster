@@ -12,13 +12,14 @@ export class DecodedMessageWithMoonlight extends DecodedMessage {
   moonlightTo?: string;
   moonlightFrom?: string;
   moonlightTxHash?: string;
+  moonlightReference?: string;
 }
 
 const detectMoonlightMessage = (message: DecodedMessage) => {
   const paymentRequestE =
     /#Moonlight - .+ sent you a payment request:\nAmount: (?<amount>[\d.]*)\nToken: (?<token>\w*)\nAddress: (?<to>\w*)/;
   const paymentReceiptE =
-    /#Moonlight - .+ paid you:\nAmount: (?<amount>[\d.]*)\nToken: (?<token>\w*)\nAddress: (?<to>\w*)\nTxHash: (?<txHash>\w*)/;
+    /#Moonlight - .+ paid you:\nAmount: (?<amount>[\d.]*)\nToken: (?<token>\w*)\nAddress: (?<to>\w*)\nTxHash: (?<txHash>\w*)(?:\nReference: (?<reference>\w*))?/;
   if (message.content && message.content.startsWith('#Moonlight')) {
     let m = paymentRequestE.exec(message.content);
     if (m) {
@@ -31,6 +32,7 @@ const detectMoonlightMessage = (message: DecodedMessage) => {
         moonlightTo: m.groups?.to,
         moonlightFrom: m.groups?.from,
         moonlightTxHash: m.groups?.txHash,
+        moonlightReference: m.groups?.reference,
         ...message
       } as DecodedMessageWithMoonlight;
     }
@@ -45,6 +47,7 @@ const detectMoonlightMessage = (message: DecodedMessage) => {
         moonlightTo: m.groups?.to,
         moonlightFrom: m.groups?.from,
         moonlightTxHash: m.groups?.txHash,
+        moonlightReference: m.groups?.reference,
         ...message
       } as DecodedMessageWithMoonlight;
     }
@@ -91,8 +94,19 @@ const useGetMessages = (conversationKey: string, conversation?: Conversation, en
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversation, conversationKey, endTime]);
 
+  const filteredMessages = messages?.filter((message) => {
+    if (message.moonlightReference) {
+      const parent = messages.find((t) => t.id == message.moonlightReference);
+      if (parent) {
+        parent.moonlightTxHash = message.moonlightTxHash;
+        return false;
+      }
+    }
+    return true;
+  });
+
   return {
-    messages,
+    messages: filteredMessages,
     hasMore: hasMore.get(conversationKey) ?? false
   };
 };

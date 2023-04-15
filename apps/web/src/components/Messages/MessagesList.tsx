@@ -26,7 +26,13 @@ interface MessageTileProps {
   message: DecodedMessageWithMoonlight;
   profile?: Profile;
   currentProfile?: Profile | null;
-  sendPaymentReceipt: (amount: string, token: string, txHash: string, to?: string) => Promise<boolean>;
+  sendPaymentReceipt: (
+    amount: string,
+    token: string,
+    txHash: string,
+    to?: string,
+    reference?: string
+  ) => Promise<boolean>;
 }
 
 const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile, sendPaymentReceipt }) => {
@@ -46,7 +52,7 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile, s
 
     const txHash = await transfer(tokenAddress, toAddress, fromAddress, qty, signer!);
 
-    sendPaymentReceipt(message.moonlightAmount!, token, txHash);
+    sendPaymentReceipt(message.moonlightAmount!, token, txHash, toAddress, message.id);
     setPaymentSending(false);
   };
 
@@ -91,19 +97,23 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile, s
             <span className="text-3xl text-white">
               {message.moonlightAmount} {message.moonlightToken}
               {message.moonlightType == 'request' && ' Request'}
+              {message.moonlightType == 'request' && message.moonlightTxHash && ' - Accepted'}
             </span>
           )}
-          {address !== message.senderAddress && message.isMoonlight && message.moonlightType == 'request' && (
-            <div className="mt-4">
-              <Button variant="secondary" onClick={handlePaymentSending}>
-                <div>
-                  {!paymentSending && <p>Accept</p>}
-                  {paymentSending && <Spinner size="sm" className="h-5 w-5" />}
-                </div>
-              </Button>
-            </div>
-          )}
-          {message.isMoonlight && message.moonlightType == 'receipt' && (
+          {address !== message.senderAddress &&
+            message.isMoonlight &&
+            message.moonlightType == 'request' &&
+            !message.moonlightTxHash && (
+              <div className="mt-4">
+                <Button variant="secondary" onClick={handlePaymentSending}>
+                  <div>
+                    {!paymentSending && <p>Accept</p>}
+                    {paymentSending && <Spinner size="sm" className="h-5 w-5" />}
+                  </div>
+                </Button>
+              </div>
+            )}
+          {message.isMoonlight && message.moonlightTxHash && (
             <div className="mt-4">
               <Button
                 variant="secondary"
