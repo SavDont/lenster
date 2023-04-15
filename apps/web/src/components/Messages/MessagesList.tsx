@@ -11,7 +11,7 @@ import getAvatar from 'lib/getAvatar';
 import type { FC, ReactNode } from 'react';
 import { memo } from 'react';
 import { useInView } from 'react-cool-inview';
-import { Card, Image } from 'ui';
+import { Button, Card, Image } from 'ui';
 
 const isOnSameDay = (d1?: Date, d2?: Date): boolean => {
   return dayjs(d1).format('YYYYMMDD') === dayjs(d2).format('YYYYMMDD');
@@ -49,18 +49,28 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile })
         <div
           className={clsx(
             address === message.senderAddress ? 'bg-brand-500' : 'bg-gray-100 dark:bg-gray-700',
-            message.isMoonlight && message.moonlightType == 'request' ? 'bg-black' : '',
-            'w-full rounded-lg px-4 py-2'
+            message.isMoonlight && message.moonlightType == 'request' ? 'bg-black p-8' : 'px-4 py-2',
+            'w-full rounded-lg'
           )}
         >
-          <span
-            className={clsx(
-              address === message.senderAddress && 'text-white',
-              'text-md linkify-message block break-words'
-            )}
-          >
-            {message.error ? `Error: ${message.error?.message}` : <Markup>{message.content}</Markup> ?? ''}
-          </span>
+          {!message.isMoonlight ?
+            <span
+              className={clsx(
+                address === message.senderAddress && 'text-white',
+                'text-md linkify-message block break-words'
+              )}
+            >
+              {message.error ? `Error: ${message.error?.message}` : <Markup>{message.content}</Markup> ?? ''}
+            </span>
+          :
+            <span className="text-3xl text-white">
+              {message.moonlightAmount} {message.moonlightToken} Request
+            </span>
+          }
+          {message.isMoonlight &&
+            <div className="mt-4"><Button variant="secondary">Accept</Button></div>
+          }
+
         </div>
       </div>
       <div className={clsx(address !== message.senderAddress ? 'ml-12' : '')}>
