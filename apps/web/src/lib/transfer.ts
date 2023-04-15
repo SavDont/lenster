@@ -24,9 +24,9 @@ async function transfer(
   } else {
     const contract = new ethers.Contract(tokenAddress, ABI, signer);
     console.log('contract is ', contract);
-    const tx = contract.transfer(toAddress, amount);
+    const tx = await contract.transfer(toAddress, amount);
     console.log('transactionHash is ', tx);
-    return tx;
+    return tx.hash;
   }
 }
 

@@ -1,10 +1,8 @@
 import type { Conversation } from '@xmtp/xmtp-js';
 import { useCallback } from 'react';
 
-const formatPaymentReceipt = (amount: string, token: string, to: string, txHash: string | object) =>
-  `#Moonlight - [Name] paid you:\nAmount: ${amount}\nToken: ${token}\nAddress: ${to}\nTxHash: ${
-    token === 'USDC' ? txHash.hash : txHash
-  }`;
+const formatPaymentReceipt = (amount: string, token: string, to: string, txHash: string) =>
+  `#Moonlight - [Name] paid you:\nAmount: ${amount}\nToken: ${token}\nAddress: ${to}\nTxHash: ${txHash}`;
 
 const useSendPaymentReceipt = (conversation?: Conversation) => {
   const sendPaymentReceipt = useCallback(
