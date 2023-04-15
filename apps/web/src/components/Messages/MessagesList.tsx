@@ -1,6 +1,6 @@
 import Markup from '@components/Shared/Markup';
 import type { DecodedMessageWithMoonlight } from '@components/utils/hooks/useGetMessages';
-import { EmojiSadIcon } from '@heroicons/react/outline';
+import { EmojiSadIcon, CheckCircleIcon } from '@heroicons/react/outline';
 import { formatTime } from '@lib/formatTime';
 import transfer from '@lib/transfer';
 import { Trans } from '@lingui/macro';
@@ -77,7 +77,7 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile, s
         <div
           className={clsx(
             message.isMoonlight
-              ? 'bg-black p-8'
+              ? 'bg-black p-3'
               : address === message.senderAddress
               ? 'bg-brand-500 px-4 py-2'
               : 'bg-gray-100 px-4 py-2 dark:bg-gray-700',
@@ -94,11 +94,21 @@ const MessageTile: FC<MessageTileProps> = ({ message, profile, currentProfile, s
               {message.error ? `Error: ${message.error?.message}` : <Markup>{message.content}</Markup> ?? ''}
             </span>
           ) : (
-            <span className="text-3xl text-white">
-              {message.moonlightAmount} {message.moonlightToken}
-              {message.moonlightType == 'request' && ' Request'}
-              {message.moonlightType == 'request' && message.moonlightTxHash && ' - Accepted'}
-            </span>
+            <div>
+              <div className="flex text-xs text-white">
+                {message.moonlightType == 'request' && 'Requested'}
+                {message.moonlightType == 'request' && message.moonlightTxHash && (
+                  <div className="text-green-500">
+                    <CheckCircleIcon className="h-4 w-4" />
+                  </div>
+                )}
+                {message.moonlightType == 'receipt' && <div>Paid</div>}
+              </div>
+
+              <span className="text-3xl text-white">
+                {message.moonlightAmount} {message.moonlightToken}
+              </span>
+            </div>
           )}
           {address !== message.senderAddress &&
             message.isMoonlight &&
